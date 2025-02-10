@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Universal Unit Converter</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f4f4f4;
+        }
+    </style>
+</head>
+<body class="container mx-auto p-6">
+    <div class="bg-white shadow-md rounded-lg p-6">
+        <h1 class="text-2xl font-bold mb-4 text-center">Universal Unit Converter</h1>
+        
+        <div class="mb-4">
+            <label class="block mb-2">Category:</label>
+            <select id="categorySelect" class="w-full p-2 border rounded">
+                <option value="length">Length</option>
+                <option value="weight">Weight</option>
+                <option value="temperature">Temperature</option>
+                <option value="volume">Volume</option>
+            </select>
+        </div>
+
+        <div class="flex space-x-4 mb-4">
+            <div class="w-1/2">
+                <label class="block mb-2">From Unit:</label>
+                <select id="fromUnitSelect" class="w-full p-2 border rounded"></select>
+            </div>
+            <div class="w-1/2">
+                <label class="block mb-2">To Unit:</label>
+                <select id="toUnitSelect" class="w-full p-2 border rounded"></select>
+            </div>
+        </div>
+
+        <div class="flex space-x-4 mb-4">
+            <div class="w-1/2">
+                <label class="block mb-2">Value:</label>
+                <input 
+                    type="number" 
+                    id="inputValue" 
+                    class="w-full p-2 border rounded"
+                    placeholder="Enter value"
+                >
+            </div>
+            <div class="w-1/2">
+                <label class="block mb-2">Result:</label>
+                <input 
+                    type="text" 
+                    id="outputValue" 
+                    class="w-full p-2 border rounded bg-gray-100" 
+                    readonly
+                >
+            </div>
+        </div>
+
+        <button 
+            id="convertBtn" 
+            class="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
+        >
+            Convert
+        </button>
+    </div>
+
+    <script>
+        const conversions = {
+            length: {
+                meters: {
+                    feet: value => value * 3.28084,
+                    inches: value => value * 39.3701,
+                    kilometers: value => value / 1000,
+                    yards: value => value * 1.09361
+                },
+                feet: {
+                    meters: value => value / 3.28084,
+                    inches: value => value * 12,
+                    kilometers: value => value / 3280.84,
+                    yards: value => value / 3
+                }
+            },
+            weight: {
+                kilograms: {
+                    pounds: value => value * 2.20462,
+                    grams: value => value * 1000,
+                    ounces: value => value * 35.274
+                },
+                pounds: {
+                    kilograms: value => value / 2.20462,
+                    grams: value => value * 453.592,
+                    ounces: value => value * 16
+                }
+            },
+            temperature: {
+                celsius: {
+                    fahrenheit: value => (value * 9/5) + 32,
+                    kelvin: value => value + 273.15
+                },
+                fahrenheit: {
+                    celsius: value => (value - 32) * 5/9,
+                    kelvin: value => (value - 32) * 5/9 + 273.15
+                }
+            },
+            volume: {
+                liters: {
+                    gallons: value => value * 0.264172,
+                    milliliters: value => value * 1000,
+                    cups: value => value * 4.22675
+                },
+                gallons: {
+                    liters: value => value * 3.78541,
+                    milliliters: value => value * 3785.41,
+                    cups: value => value * 16
+                }
+            }
+        };
+
+        const categorySelect = document.getElementById('categorySelect');
+        const fromUnitSelect = document.getElementById('fromUnitSelect');
+        const toUnitSelect = document.getElementById('toUnitSelect');
+        const inputValue = document.getElementById('inputValue');
+        const outputValue = document.getElementById('outputValue');
+        const convertBtn = document.getElementById('convertBtn');
+
+        function populateUnits() {
+            const category = categorySelect.value;
+            const units = Object.keys(conversions[category]);
+
+            fromUnitSelect.innerHTML = units.map(unit => 
+                `<option value="${unit}">${unit}</option>`
+            ).join('');
+
+            toUnitSelect.innerHTML = units.map(unit => 
+                `<option value="${unit}">${unit}</option>`
+            ).join('');
+        }
+
+        function convert() {
+            const category = categorySelect.value;
+            const fromUnit = fromUnitSelect.value;
+            const toUnit = toUnitSelect.value;
+            const value = parseFloat(inputValue.value);
+
+            if (isNaN(value)) {
+                outputValue.value = 'Invalid input';
+                return;
+            }
+
+            if (fromUnit === toUnit) {
+                outputValue.value = value;
+                return;
+            }
+
+            const conversionFunction = conversions[category][fromUnit][toUnit];
+            const result = conversionFunction(value);
+            outputValue.value = result.toFixed(4);
+        }
+
+        categorySelect.addEventListener('change', populateUnits);
+        convertBtn.addEventListener('click', convert);
+
+        // Initialize units on page load
+        populateUnits();
+    </script>
+</body>
+</html>
